@@ -900,7 +900,7 @@ if [[ -f $XUIDB ]]; then
       "enable": true,
       "expiryTime": 0,
       "limitIp": 0,
-      "password": ${trojan-pass},
+      "password": "${trojan-pass}",
       "reset": 0,
       "subId": "first",
       "tgId": 0,
