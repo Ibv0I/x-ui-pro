@@ -690,7 +690,7 @@ if [[ -f $XUIDB ]]; then
   "realitySettings": {
     "show": false,
     "xver": 0,
-    "target": "${reality_domain}:9443",
+    "target": "127.0.0.1:9443",
     "serverNames": [
       "$reality_domain"
     ],
