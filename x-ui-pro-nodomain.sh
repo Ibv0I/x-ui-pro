@@ -868,7 +868,7 @@ else
 	
 	wget -O /root/panel.sh "https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh"
 	chmod +x /root/panel.sh
-	yes n | /root/panel.sh >>/var/log/xui-install.log 2>&1
+	script -q -c "bash -lc '/root/panel.sh'" /var/log/xui-install.log
 	rm -rf /root/panel.sh
 	
 	UPDATE_XUIDB
