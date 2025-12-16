@@ -865,12 +865,12 @@ fi
 if systemctl is-active --quiet x-ui; then
 	x-ui restart
 else
-	PANEL=( "https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh"
-			"https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh"
-			"https://raw.githubusercontent.com/FranzKafkaYu/x-ui/master/install_en.sh"
-		)
-
-	printf 'n\n' | bash <(wget -qO- "${PANEL[$PNLNUM]}")
+	
+	wget -O /root/panel.sh "https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh"
+	chmod +x /root/panel.sh
+	printf 'n\n' | /root/panel.sh >>/var/log/xui-install.log 2>&1
+	rm -rf /root/panel.sh
+	
 	UPDATE_XUIDB
 	if ! systemctl is-enabled --quiet x-ui; then
 		systemctl daemon-reload && systemctl enable x-ui.service
