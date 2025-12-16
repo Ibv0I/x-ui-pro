@@ -47,16 +47,16 @@ make_port() {
 }
 sub_port=$(make_port)
 panel_port=$(make_port)
-web_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
-sub2singbox_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
-sub_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
-json_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
-panel_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
+web_path=$(gen_random_string 10)
+sub2singbox_path=$(gen_random_string 10)
+sub_path=$(gen_random_string 10)
+json_path=$(gen_random_string 10)
+panel_path=$(gen_random_string 10)
 ws_port=$(make_port)
 trojan_port=$(make_port)
-ws_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
-trojan_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
-xhttp_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
+ws_path=$(gen_random_string 10)
+trojan_path=$(gen_random_string 10)
+xhttp_path=$(gen_random_string 10)
 config_username=$(gen_random_string 10)
 config_password=$(gen_random_string 10)
 AUTODOMAIN="n"
@@ -97,7 +97,6 @@ UNINSTALL_XUI(){
 	$Pak -y autoremove
 	$Pak -y autoclean
 	rm -rf "/var/www/html/" "/etc/nginx/" "/usr/share/nginx/" 
-	crontab -l | grep -v "certbot\|x-ui\|cloudflareips" | crontab -
 }
 if [[ ${UNINSTALL} == *"y"* ]]; then
 	UNINSTALL_XUI	
@@ -211,30 +210,7 @@ if [[ ! -d "/etc/letsencrypt/live/${reality_domain}/" ]]; then
 	msg_err "$reality_domain SSL could not be generated! Check Domain/IP Or Enter new domain!" && exit 1
 fi
 ################################# Access to configs only with cloudflare#################################
-rm -f "/etc/nginx/cloudflareips.sh"
-cat << 'EOF' >> /etc/nginx/cloudflareips.sh
-#!/bin/bash
-rm -f "/etc/nginx/conf.d/cloudflare_real_ips.conf" "/etc/nginx/conf.d/cloudflare_whitelist.conf"
-CLOUDFLARE_REAL_IPS_PATH=/etc/nginx/conf.d/cloudflare_real_ips.conf
-CLOUDFLARE_WHITELIST_PATH=/etc/nginx/conf.d/cloudflare_whitelist.conf
-echo "geo \$realip_remote_addr \$cloudflare_ip {
-	default 0;" >> $CLOUDFLARE_WHITELIST_PATH
-for type in v4 v6; do
-	echo "# IP$type"
-	for ip in `curl https://www.cloudflare.com/ips-$type`; do
-		echo "set_real_ip_from $ip;" >> $CLOUDFLARE_REAL_IPS_PATH;
-		echo "	$ip 1;" >> $CLOUDFLARE_WHITELIST_PATH;
-	done
-done
-echo "real_ip_header X-Forwarded-For;" >> $CLOUDFLARE_REAL_IPS_PATH
-echo "}" >> $CLOUDFLARE_WHITELIST_PATH
-EOF
-sudo bash "/etc/nginx/cloudflareips.sh" > /dev/null 2>&1;
-if [[ ${CFALLOW} == *"y"* ]]; then
-	CF_IP="";
-	else	
-	CF_IP="#";
-fi
+
 ###################################Get Installed XUI Port/Path##########################################
 if [[ -f $XUIDB ]]; then
 	XUIPORT=$(sqlite3 -list $XUIDB 'SELECT "value" FROM settings WHERE "key"="webPort" LIMIT 1;' 2>&1)
@@ -428,7 +404,6 @@ cat > "/etc/nginx/snippets/includes.conf" << EOF
           }
  	#Xray Config Path
 	location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
-	$CF_IP	if (\$cloudflare_ip != 1) {return 404;}
 		if (\$hack = 1) {return 404;}
 		client_max_body_size 0;
 		client_body_timeout 1d;
@@ -979,7 +954,6 @@ sed -i "s|sub.legiz.ru|$domain/$sub2singbox_path|g" "$DEST_FILE_SUB_PAGE"
 crontab -l | grep -v "certbot\|x-ui\|cloudflareips" | crontab -
 (crontab -l 2>/dev/null; echo '@reboot /usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080 > /dev/null 2>&1') | crontab -
 (crontab -l 2>/dev/null; echo '@daily x-ui restart > /dev/null 2>&1 && nginx -s reload;') | crontab -
-(crontab -l 2>/dev/null; echo '@weekly bash /etc/nginx/cloudflareips.sh > /dev/null 2>&1;') | crontab -
 (crontab -l 2>/dev/null; echo '@monthly certbot renew --nginx --non-interactive --post-hook "nginx -s reload" > /dev/null 2>&1;') | crontab -
 ##################################ufw###################################################################
 ufw disable
