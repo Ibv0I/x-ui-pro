@@ -964,7 +964,7 @@ apt-get update && apt-get install -y -q wget curl tar tzdata
         rc-update add x-ui
         rc-service x-ui start
     else
-        cp -f x-ui.service /etc/systemd/system/
+        cp -f x-ui.service.debian /etc/systemd/system/x-ui.service
         systemctl daemon-reload
         systemctl enable x-ui
         systemctl start x-ui
